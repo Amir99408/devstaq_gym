@@ -3,6 +3,7 @@
 use App\Enums\MemberStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Member;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -162,9 +163,20 @@ new #[Layout('layouts.app'), Title('Members')] class extends Component {
                         @foreach ($this->members as $member)
                             <flux:table.row>
                                 <flux:table.cell>
-                                    <div>
-                                        <p class="font-medium text-zinc-900 dark:text-white">{{ $member->full_name }}</p>
-                                        <p class="text-xs text-zinc-500">{{ $member->registration_number }}</p>
+                                    <div class="flex items-center gap-3">
+                                        @if($member->profile_photo_path)
+                                            <img src="{{ Storage::url($member->profile_photo_path) }}"
+                                                 alt="{{ $member->full_name }}"
+                                                 class="size-9 shrink-0 rounded-full object-cover" />
+                                        @else
+                                            <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+                                                {{ mb_substr($member->full_name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="font-medium text-zinc-900 dark:text-white">{{ $member->full_name }}</p>
+                                            <p class="text-xs text-zinc-500">{{ $member->registration_number }}</p>
+                                        </div>
                                     </div>
                                 </flux:table.cell>
 

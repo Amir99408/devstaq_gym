@@ -114,13 +114,15 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             ->orderByDesc('verified_at')
             ->limit(6)
             ->with([
-                'member:id,full_name,registration_number',
+                'member:id,full_name,registration_number,profile_photo_path',
                 'verifiedBy:id,name',
             ])
             ->get()
             ->map(fn ($p) => (object) [
                 'icon'   => 'check-circle',
                 'color'  => 'green',
+                'photo'  => $p->member->profile_photo_path,
+                'name'   => $p->member->full_name,
                 'text'   => 'Registration verified — ' . $p->member->full_name,
                 'sub'    => 'RM ' . number_format($p->amount, 2) . ' · by ' . ($p->verifiedBy?->name ?? 'system'),
                 'at'     => $p->verified_at,
@@ -132,13 +134,15 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             ->orderByDesc('verified_at')
             ->limit(6)
             ->with([
-                'member:id,full_name,registration_number',
+                'member:id,full_name,registration_number,profile_photo_path',
                 'verifiedBy:id,name',
             ])
             ->get()
             ->map(fn ($p) => (object) [
                 'icon'   => 'banknotes',
                 'color'  => 'blue',
+                'photo'  => $p->member->profile_photo_path,
+                'name'   => $p->member->full_name,
                 'text'   => 'Monthly payment verified — ' . $p->member->full_name,
                 'sub'    => 'RM ' . number_format($p->amount_due, 2) . ' · ' . $p->billing_month->format('M Y') . ' · by ' . ($p->verifiedBy?->name ?? 'system'),
                 'at'     => $p->verified_at,
@@ -147,10 +151,12 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
 
         $newMembers = Member::orderByDesc('created_at')
             ->limit(6)
-            ->get(['id', 'full_name', 'registration_number', 'status', 'created_at'])
+            ->get(['id', 'full_name', 'registration_number', 'status', 'created_at', 'profile_photo_path'])
             ->map(fn ($m) => (object) [
                 'icon'   => 'user-plus',
                 'color'  => 'purple',
+                'photo'  => $m->profile_photo_path,
+                'name'   => $m->full_name,
                 'text'   => 'New member registered — ' . $m->full_name,
                 'sub'    => $m->registration_number . ' · ' . $m->status->label(),
                 'at'     => $m->created_at,
@@ -380,12 +386,22 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                                     'purple' => 'bg-violet-500',
                                     default  => 'bg-zinc-300',
                                 };
-                                $iconFg = 'size-4 text-white';
                             @endphp
                             <a href="{{ $event->href }}" wire:navigate
                                class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-zinc-50">
-                                <div class="flex size-8 shrink-0 items-center justify-center rounded-full {{ $iconBg }}">
-                                    <flux:icon :name="$event->icon" :class="$iconFg" />
+                                <div class="relative shrink-0">
+                                    @if($event->photo)
+                                        <img src="{{ Storage::url($event->photo) }}"
+                                             alt="{{ $event->name }}"
+                                             class="size-9 rounded-full object-cover" />
+                                    @else
+                                        <div class="flex size-9 items-center justify-center rounded-full bg-zinc-100 text-sm font-bold text-zinc-500">
+                                            {{ mb_substr($event->name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                    <div class="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full {{ $iconBg }} ring-2 ring-white">
+                                        <flux:icon :name="$event->icon" class="size-2.5 text-white" />
+                                    </div>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate text-sm font-medium text-zinc-800">{{ $event->text }}</p>

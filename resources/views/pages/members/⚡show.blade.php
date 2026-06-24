@@ -28,6 +28,9 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
     #[Validate('required|image|mimes:jpg,jpeg,png,webp|max:5120')]
     public $uploadFile = null;
 
+    #[Validate('required|image|mimes:jpg,jpeg,png,webp|max:2048')]
+    public $photoFile = null;
+
     // Login creation
     public string $loginEmail = '';
     public string $generatedPassword = '';
@@ -48,6 +51,47 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
             'monthlyPayments.verifiedBy',
             'creator',
         ])->findOrFail($this->memberId);
+    }
+
+    public function openUploadPhoto(): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->photoFile = null;
+        $this->resetValidation('photoFile');
+        Flux::modal('photo-upload')->show();
+    }
+
+    public function uploadPhoto(): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->validateOnly('photoFile');
+
+        $member = $this->member;
+
+        if ($member->profile_photo_path) {
+            Storage::disk('public')->delete($member->profile_photo_path);
+        }
+
+        $path = $this->photoFile->store('photos', 'public');
+        Member::whereKey($this->memberId)->update(['profile_photo_path' => $path]);
+
+        $this->photoFile = null;
+        unset($this->member);
+        Flux::modal('photo-upload')->close();
+        Flux::toast(variant: 'success', text: 'Photo updated.');
+    }
+
+    public function removePhoto(): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+
+        $member = $this->member;
+        if ($member->profile_photo_path) {
+            Storage::disk('public')->delete($member->profile_photo_path);
+            Member::whereKey($this->memberId)->update(['profile_photo_path' => null]);
+            unset($this->member);
+            Flux::toast(variant: 'success', text: 'Photo removed.');
+        }
     }
 
     public function changeStatus(string $status): void
@@ -174,9 +218,30 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
 
                     {{-- Avatar + Name --}}
                     <div class="flex flex-col items-center text-center">
-                        <div class="flex size-20 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600 dark:bg-blue-900 dark:text-blue-300">
-                            {{ mb_substr($this->member->full_name, 0, 1) }}
+                        <div class="relative">
+                            @if($this->member->profile_photo_path)
+                                <img src="{{ Storage::url($this->member->profile_photo_path) }}"
+                                     alt="{{ $this->member->full_name }}"
+                                     class="size-24 rounded-full object-cover ring-4 ring-white shadow-md" />
+                            @else
+                                <div class="flex size-24 items-center justify-center rounded-full bg-blue-100 text-3xl font-bold text-blue-600 ring-4 ring-white shadow-md">
+                                    {{ mb_substr($this->member->full_name, 0, 1) }}
+                                </div>
+                            @endif
+                            @if(auth()->user()->isAdmin())
+                                <button wire:click="openUploadPhoto"
+                                    class="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 shadow-md ring-2 ring-white transition-colors hover:bg-blue-700">
+                                    <flux:icon name="camera" class="size-3.5 text-white" />
+                                </button>
+                            @endif
                         </div>
+                        @if($this->member->profile_photo_path && auth()->user()->isAdmin())
+                            <button wire:click="removePhoto"
+                                wire:confirm="Remove this member's photo?"
+                                class="mt-1 text-xs text-zinc-400 hover:text-red-500 transition-colors">
+                                Remove photo
+                            </button>
+                        @endif
                         <flux:heading class="mt-3" size="lg">{{ $this->member->full_name }}</flux:heading>
                         <flux:text class="mt-0.5 text-sm">{{ $this->member->registration_number }}</flux:text>
                         <div class="mt-2">
@@ -412,6 +477,29 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
             </div>
         </div>
     </div>
+
+    {{-- Photo upload modal --}}
+    <flux:modal name="photo-upload" class="w-full max-w-md">
+        <div class="p-6">
+            <flux:heading size="lg">Upload Member Photo</flux:heading>
+            <flux:text class="mt-1 text-sm">JPG, PNG, or WebP — max 2MB.</flux:text>
+            <form wire:submit="uploadPhoto" class="mt-4 space-y-4">
+                <input type="file" wire:model="photoFile" accept="image/*"
+                    class="block w-full text-sm text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200" />
+                @error('photoFile') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+                @if($photoFile)
+                    <img src="{{ $photoFile->temporaryUrl() }}" class="mx-auto size-28 rounded-full object-cover ring-4 ring-blue-100" />
+                @endif
+                <div class="flex justify-end gap-3">
+                    <flux:button type="button" variant="ghost" x-on:click="$flux.modal('photo-upload').close()">Cancel</flux:button>
+                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Upload Photo</span>
+                        <span wire:loading>Uploading...</span>
+                    </flux:button>
+                </div>
+            </form>
+        </div>
+    </flux:modal>
 
     {{-- Create Login modal --}}
     <flux:modal name="create-login" class="w-full max-w-md">
