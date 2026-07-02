@@ -9,8 +9,12 @@
         <meta name="description" content="{{ $setting->meta_description }}" />
     @endif
 
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    @if ($setting->favicon_path)
+        <link rel="icon" href="{{ Storage::url($setting->favicon_path) }}" type="image/png" />
+    @else
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    @endif
 
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
