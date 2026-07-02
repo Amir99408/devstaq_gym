@@ -46,6 +46,9 @@
             <div class="hidden items-center gap-8 text-sm font-medium text-zinc-600 md:flex">
                 <a href="#about" class="transition-colors hover:text-brand">About</a>
                 <a href="#plans" class="transition-colors hover:text-brand">Plans</a>
+                @if ($setting->google_maps_embed_url)
+                    <a href="#location" class="transition-colors hover:text-brand">Location</a>
+                @endif
                 <a href="#contact" class="transition-colors hover:text-brand">Contact</a>
             </div>
 
@@ -298,6 +301,42 @@
             </p>
         </div>
     </section>
+
+    {{-- ───── Location Map ───── --}}
+    @if ($setting->google_maps_embed_url)
+        <section id="location" class="bg-white py-20 sm:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6">
+                <div class="text-center">
+                    <p class="text-sm font-semibold uppercase tracking-wider text-brand">Find Us</p>
+                    <h2 class="mt-2 text-4xl font-black text-zinc-900">Our Location</h2>
+                    @if ($setting->address)
+                        <p class="mx-auto mt-3 max-w-xl text-lg text-zinc-500">{{ $setting->address }}</p>
+                    @endif
+                </div>
+                <div class="mt-10 overflow-hidden rounded-2xl border border-zinc-200 shadow-lg">
+                    <iframe
+                        src="{{ $setting->google_maps_embed_url }}"
+                        width="100%"
+                        height="450"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        class="w-full"
+                    ></iframe>
+                </div>
+                @if ($setting->address)
+                    <div class="mt-6 flex items-center justify-center gap-2 text-zinc-500">
+                        <svg class="size-4 shrink-0 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="text-sm">{{ $setting->address }}</span>
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endif
 
     {{-- ───── Contact ───── --}}
     <section id="contact" class="py-20 text-white sm:py-28" style="background-color: var(--brand-dark)">

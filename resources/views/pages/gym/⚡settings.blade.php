@@ -28,6 +28,9 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
     public string $email = '';
     public string $whatsapp = '';
 
+    // ─── Location ─────────────────────────────────────────────────────────────
+    public string $google_maps_embed_url = '';
+
     // ─── Social ───────────────────────────────────────────────────────────────
     public string $facebook_url = '';
     public string $instagram_url = '';
@@ -65,6 +68,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
         $this->phone            = $s->phone ?? '';
         $this->email            = $s->email ?? '';
         $this->whatsapp         = $s->whatsapp ?? '';
+        $this->google_maps_embed_url = $s->google_maps_embed_url ?? '';
         $this->facebook_url     = $s->facebook_url ?? '';
         $this->instagram_url    = $s->instagram_url ?? '';
         $this->primary_color    = $s->primary_color ?? '#2563eb';
@@ -95,6 +99,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
             'phone'           => 'nullable|string|max:30',
             'email'           => 'nullable|email|max:100',
             'whatsapp'        => 'nullable|string|max:30',
+            'google_maps_embed_url' => 'nullable|url|max:1000',
             'facebook_url'    => 'nullable|url|max:255',
             'instagram_url'   => 'nullable|url|max:255',
             'primary_color'   => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
@@ -114,6 +119,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
             'phone'            => $this->phone ?: null,
             'email'            => $this->email ?: null,
             'whatsapp'         => $this->whatsapp ?: null,
+            'google_maps_embed_url' => $this->google_maps_embed_url ?: null,
             'facebook_url'     => $this->facebook_url ?: null,
             'instagram_url'    => $this->instagram_url ?: null,
             'primary_color'    => $this->primary_color ?: '#2563eb',
@@ -401,6 +407,16 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
                     <flux:input wire:model="whatsapp" placeholder="60123456789" />
                     <flux:description>Digits only with country code — e.g. 60123456789.</flux:description>
                     <flux:error name="whatsapp" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Google Maps Embed URL</flux:label>
+                    <flux:input wire:model="google_maps_embed_url" type="url"
+                        placeholder="https://www.google.com/maps/embed?pb=..." />
+                    <flux:description>
+                        Go to Google Maps → search your gym → Share → Embed a map → copy only the URL inside src="…" from the iframe code.
+                    </flux:description>
+                    <flux:error name="google_maps_embed_url" />
                 </flux:field>
             </div>
         </div>
