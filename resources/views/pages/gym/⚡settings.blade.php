@@ -217,12 +217,12 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+<div class="mx-auto max-w-3xl px-6 py-6 sm:px-8">
 
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <flux:heading size="xl">Settings</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">Manage your gym and account settings.</flux:text>
+            <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">Settings</h1>
+            <p class="mt-1 text-sm font-medium text-zinc-500">Manage your gym and account settings.</p>
         </div>
     </div>
 
@@ -251,7 +251,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- ─── Identity ─── --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-5">Gym Identity</flux:heading>
+            <h3 class="mb-5 text-base font-bold text-zinc-900 dark:text-white">Gym Identity</h3>
             <div class="space-y-4">
 
                 <flux:field>
@@ -277,7 +277,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- ─── Branding / Images ─── --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-5">Branding & Images</flux:heading>
+            <h3 class="mb-5 text-base font-bold text-zinc-900 dark:text-white">Branding & Images</h3>
             <div class="space-y-6">
 
                 {{-- Brand Colors --}}
@@ -374,7 +374,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- ─── Contact ─── --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-5">Contact Details</flux:heading>
+            <h3 class="mb-5 text-base font-bold text-zinc-900 dark:text-white">Contact Details</h3>
             <div class="space-y-4">
 
                 <flux:field>
@@ -407,7 +407,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- ─── Social ─── --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-5">Social Media</flux:heading>
+            <h3 class="mb-5 text-base font-bold text-zinc-900 dark:text-white">Social Media</h3>
             <div class="space-y-4">
                 <flux:field>
                     <flux:label>Facebook URL</flux:label>
@@ -424,7 +424,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- ─── SEO ─── --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-1">SEO / Meta</flux:heading>
+            <h3 class="mb-1 text-base font-bold text-zinc-900 dark:text-white">SEO / Meta</h3>
             <flux:text class="mb-5 text-sm text-zinc-500">Controls how your gym appears in Google search results.</flux:text>
             <div class="space-y-4">
                 <flux:field>
@@ -474,7 +474,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- Change Email --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-1">Change Email Address</flux:heading>
+            <h3 class="mb-1 text-base font-bold text-zinc-900 dark:text-white">Change Email Address</h3>
             <flux:text class="mb-5 text-sm text-zinc-500">Update the email address used to log in.</flux:text>
 
             <form wire:submit="updateEmail" class="space-y-4">
@@ -494,7 +494,7 @@ new #[Layout('layouts.app'), Title('Gym Settings')] class extends Component {
 
         {{-- Change Password --}}
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
-            <flux:heading size="base" class="mb-1">Change Password</flux:heading>
+            <h3 class="mb-1 text-base font-bold text-zinc-900 dark:text-white">Change Password</h3>
             <flux:text class="mb-5 text-sm text-zinc-500">Use a strong password you don't use elsewhere.</flux:text>
 
             <form wire:submit="updatePassword" class="space-y-4">

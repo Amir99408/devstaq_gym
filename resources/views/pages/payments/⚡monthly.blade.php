@@ -157,8 +157,6 @@ new #[Layout('layouts.app'), Title('Monthly Fees')] class extends Component {
         MonthlyPayment::whereKey($this->actioningId)->update([
             'status'      => PaymentStatus::Rejected->value,
             'admin_notes' => $this->adminNotes ?: null,
-            'verified_at' => now(),
-            'verified_by' => auth()->id(),
         ]);
 
         unset($this->monthlyPayments, $this->stats);
@@ -181,13 +179,13 @@ new #[Layout('layouts.app'), Title('Monthly Fees')] class extends Component {
 }; ?>
 
 <div>
-    <div class="flex flex-col gap-6 px-4 py-6 sm:px-6">
+    <div class="flex flex-col gap-6 px-6 py-6 sm:px-8">
 
         {{-- Header --}}
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <flux:heading size="xl">Monthly Fees</flux:heading>
-                <flux:text class="mt-1">Track monthly payment status for all active members.</flux:text>
+                <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">Monthly Fees</h1>
+                <p class="mt-1 text-sm font-medium text-zinc-500">Track monthly payment status for all active members.</p>
             </div>
             <div class="flex items-center gap-3">
                 <flux:input
@@ -205,21 +203,41 @@ new #[Layout('layouts.app'), Title('Monthly Fees')] class extends Component {
 
         {{-- Month stats --}}
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:text class="text-xs uppercase tracking-wider text-zinc-500">Total Active</flux:text>
-                <p class="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">{{ $this->stats->total }}</p>
+            <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-500 shadow-sm">
+                        <flux:icon name="users" class="size-5 text-white" />
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-zinc-500">Total Members</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{{ $this->stats->total }}</p>
             </div>
-            <div class="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-                <flux:text class="text-xs uppercase tracking-wider text-green-600 dark:text-green-400">Verified</flux:text>
-                <p class="mt-1 text-2xl font-bold text-green-700 dark:text-green-300">{{ $this->stats->verified }}</p>
+            <div class="rounded-xl border border-green-200 bg-green-50 p-5 shadow-sm dark:border-green-900 dark:bg-green-950">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-500 shadow-sm">
+                        <flux:icon name="check-circle" class="size-5 text-white" />
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-green-600 dark:text-green-400">Verified</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-green-700 dark:text-green-300">{{ $this->stats->verified }}</p>
             </div>
-            <div class="rounded-xl border border-orange-200 bg-orange-50 p-4 dark:border-orange-900 dark:bg-orange-950">
-                <flux:text class="text-xs uppercase tracking-wider text-orange-600 dark:text-orange-400">Pending</flux:text>
-                <p class="mt-1 text-2xl font-bold text-orange-700 dark:text-orange-300">{{ $this->stats->pending }}</p>
+            <div class="rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm dark:border-orange-900 dark:bg-orange-950">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-sm">
+                        <flux:icon name="clock" class="size-5 text-white" />
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-orange-600 dark:text-orange-400">Pending</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-orange-700 dark:text-orange-300">{{ $this->stats->pending }}</p>
             </div>
-            <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
-                <flux:text class="text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400">Waived</flux:text>
-                <p class="mt-1 text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $this->stats->waived }}</p>
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-sm dark:border-blue-900 dark:bg-blue-950">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
+                        <flux:icon name="gift" class="size-5 text-white" />
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">Waived</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300">{{ $this->stats->waived }}</p>
             </div>
         </div>
 
@@ -249,7 +267,7 @@ new #[Layout('layouts.app'), Title('Monthly Fees')] class extends Component {
                 <flux:table>
                     <thead>
                         <flux:table.row>
-                            <flux:table.column>Member</flux:table.column>
+                            <flux:table.column class="!ps-5">Member</flux:table.column>
                             <flux:table.column>Plan</flux:table.column>
                             <flux:table.column>Amount</flux:table.column>
                             <flux:table.column>Status</flux:table.column>
@@ -260,7 +278,7 @@ new #[Layout('layouts.app'), Title('Monthly Fees')] class extends Component {
                     <tbody>
                         @foreach ($this->monthlyPayments as $row)
                             <flux:table.row :class="$row->payment?->status === PaymentStatus::Overdue ? 'bg-red-50 dark:bg-red-950/30' : ''">
-                                <flux:table.cell>
+                                <flux:table.cell class="!ps-5">
                                     <flux:link :href="route('members.show', $row->member)" wire:navigate class="font-medium">
                                         {{ $row->member->full_name }}
                                     </flux:link>

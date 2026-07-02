@@ -119,13 +119,13 @@ new #[Layout('layouts.app'), Title('Membership Plans')] class extends Component 
 }; ?>
 
 <div>
-    <div class="flex flex-col gap-6 px-4 py-6 sm:px-6">
+    <div class="flex flex-col gap-6 px-6 py-6 sm:px-8">
 
         {{-- Header --}}
         <div class="flex items-center justify-between">
             <div>
-                <flux:heading size="xl">Membership Plans</flux:heading>
-                <flux:text class="mt-1">Manage the plans available to your gym members.</flux:text>
+                <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">Membership Plans</h1>
+                <p class="mt-1 text-sm font-medium text-zinc-500">Manage the plans available to your gym members.</p>
             </div>
             <flux:button icon="plus" variant="primary" wire:click="openCreate">
                 New Plan
@@ -136,75 +136,80 @@ new #[Layout('layouts.app'), Title('Membership Plans')] class extends Component 
         @if ($this->plans->isEmpty())
             <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 py-20 dark:border-zinc-700">
                 <flux:icon name="tag" class="size-12 text-zinc-400" />
-                <flux:heading class="mt-4">No plans yet</flux:heading>
-                <flux:text class="mt-1">Create your first membership plan to get started.</flux:text>
+                <h3 class="mt-4 text-base font-bold text-zinc-700 dark:text-zinc-300">No plans yet</h3>
+                <p class="mt-1 text-sm text-zinc-500">Create your first membership plan to get started.</p>
                 <flux:button class="mt-6" variant="primary" wire:click="openCreate">Create a Plan</flux:button>
             </div>
         @else
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($this->plans as $plan)
-                    <div class="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                    <div class="flex flex-col rounded-xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
 
-                        {{-- Plan header --}}
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <flux:heading size="lg">{{ $plan->name }}</flux:heading>
-                                @if ($plan->description)
-                                    <flux:text class="mt-1 text-sm line-clamp-2">{{ $plan->description }}</flux:text>
-                                @endif
+                        {{-- Coloured top bar --}}
+                        <div class="h-1.5 w-full rounded-t-xl {{ $plan->is_active ? 'bg-blue-500' : 'bg-zinc-300' }}"></div>
+
+                        <div class="flex flex-1 flex-col p-5">
+                            {{-- Plan header --}}
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 class="text-lg font-bold text-zinc-900 dark:text-white">{{ $plan->name }}</h3>
+                                    @if ($plan->description)
+                                        <p class="mt-1 line-clamp-2 text-sm text-zinc-500">{{ $plan->description }}</p>
+                                    @endif
+                                </div>
+                                <flux:badge :color="$plan->is_active ? 'green' : 'zinc'" size="sm">
+                                    {{ $plan->is_active ? 'Active' : 'Inactive' }}
+                                </flux:badge>
                             </div>
-                            <flux:badge :color="$plan->is_active ? 'green' : 'zinc'" size="sm">
-                                {{ $plan->is_active ? 'Active' : 'Inactive' }}
-                            </flux:badge>
-                        </div>
 
-                        {{-- Fees --}}
-                        <div class="mt-4 grid grid-cols-2 gap-3">
-                            <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
-                                <flux:text class="text-xs uppercase tracking-wider text-zinc-500">Registration</flux:text>
-                                <p class="mt-0.5 text-lg font-semibold text-zinc-900 dark:text-white">
-                                    RM {{ number_format($plan->registration_fee, 2) }}
+                            {{-- Fees --}}
+                            <div class="mt-4 grid grid-cols-2 gap-3">
+                                <div class="rounded-lg bg-blue-50 p-3 dark:bg-zinc-800">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-blue-500">Registration</p>
+                                    <p class="mt-1 text-xl font-extrabold text-zinc-900 dark:text-white">
+                                        RM {{ number_format($plan->registration_fee, 2) }}
+                                    </p>
+                                </div>
+                                <div class="rounded-lg bg-emerald-50 p-3 dark:bg-zinc-800">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-emerald-600">/month</p>
+                                    <p class="mt-1 text-xl font-extrabold text-zinc-900 dark:text-white">
+                                        RM {{ number_format($plan->monthly_fee, 2) }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Features --}}
+                            @if ($plan->features)
+                                <ul class="mt-4 space-y-1.5">
+                                    @foreach ($plan->features as $feature)
+                                        <li class="flex items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                                            <flux:icon name="check-circle" class="size-4 shrink-0 text-green-500" />
+                                            {{ $feature }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+
+                            <div class="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                                <p class="text-xs font-semibold text-zinc-500">
+                                    {{ $plan->member_plans_count }} {{ Str::plural('member', $plan->member_plans_count) }} enrolled
                                 </p>
                             </div>
-                            <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
-                                <flux:text class="text-xs uppercase tracking-wider text-zinc-500">Monthly</flux:text>
-                                <p class="mt-0.5 text-lg font-semibold text-zinc-900 dark:text-white">
-                                    RM {{ number_format($plan->monthly_fee, 2) }}
-                                </p>
+
+                            {{-- Actions --}}
+                            <div class="mt-3 flex items-center gap-2">
+                                <flux:button size="sm" variant="ghost" wire:click="openEdit({{ $plan->id }})">
+                                    Edit
+                                </flux:button>
+                                <flux:button
+                                    size="sm"
+                                    :variant="$plan->is_active ? 'ghost' : 'primary'"
+                                    wire:click="toggleActive({{ $plan->id }})"
+                                    wire:confirm="{{ $plan->is_active ? 'Deactivate this plan?' : 'Activate this plan?' }}"
+                                >
+                                    {{ $plan->is_active ? 'Deactivate' : 'Activate' }}
+                                </flux:button>
                             </div>
-                        </div>
-
-                        {{-- Features --}}
-                        @if ($plan->features)
-                            <ul class="mt-4 space-y-1.5">
-                                @foreach ($plan->features as $feature)
-                                    <li class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                                        <flux:icon name="check-circle" class="size-4 shrink-0 text-green-500" />
-                                        {{ $feature }}
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-
-                        <div class="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-                            <flux:text class="text-xs text-zinc-500">
-                                {{ $plan->member_plans_count }} {{ Str::plural('member', $plan->member_plans_count) }} on this plan
-                            </flux:text>
-                        </div>
-
-                        {{-- Actions --}}
-                        <div class="mt-3 flex items-center gap-2">
-                            <flux:button size="sm" wire:click="openEdit({{ $plan->id }})">
-                                Edit
-                            </flux:button>
-                            <flux:button
-                                size="sm"
-                                :variant="$plan->is_active ? 'ghost' : 'primary'"
-                                wire:click="toggleActive({{ $plan->id }})"
-                                wire:confirm="{{ $plan->is_active ? 'Deactivate this plan?' : 'Activate this plan?' }}"
-                            >
-                                {{ $plan->is_active ? 'Deactivate' : 'Activate' }}
-                            </flux:button>
                         </div>
                     </div>
                 @endforeach

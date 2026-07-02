@@ -10,16 +10,18 @@ class MemberPlan extends Model
 {
     protected $fillable = [
         'member_id', 'membership_plan_id', 'registration_fee_amount',
-        'monthly_fee_amount', 'start_date', 'end_date', 'created_by',
+        'monthly_fee_amount', 'discount_type', 'discount_amount',
+        'start_date', 'end_date', 'created_by',
     ];
 
     protected function casts(): array
     {
         return [
             'registration_fee_amount' => 'decimal:2',
-            'monthly_fee_amount' => 'decimal:2',
-            'start_date' => 'date',
-            'end_date' => 'date',
+            'monthly_fee_amount'      => 'decimal:2',
+            'discount_amount'         => 'decimal:2',
+            'start_date'              => 'date',
+            'end_date'                => 'date',
         ];
     }
 

@@ -172,7 +172,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6 px-4 py-6 sm:px-6">
+<div class="flex flex-col gap-6 px-6 py-6 sm:px-8">
 
     {{-- Greeting --}}
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -181,12 +181,14 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                 $hour = now()->hour;
                 $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
             @endphp
-            <flux:heading size="xl">{{ $greeting }}, {{ auth()->user()->name }} 👋</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">
+            <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">
+                {{ $greeting }}, {{ auth()->user()->name }} 👋
+            </h1>
+            <p class="mt-1 text-sm font-medium text-zinc-500">
                 {{ now()->format('l, d F Y') }}
-                <span class="mx-1 text-zinc-300 dark:text-zinc-600">·</span>
-                <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $this->gymName }}</span>
-            </flux:text>
+                <span class="mx-1.5 text-zinc-300 dark:text-zinc-600">·</span>
+                <span class="text-zinc-700 dark:text-zinc-300">{{ $this->gymName }}</span>
+            </p>
         </div>
         <flux:button icon="user-plus" variant="primary" :href="route('members.create')" wire:navigate>
             Add Member
@@ -235,13 +237,13 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         {{-- Active Members --}}
         <div class="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-sm transition-shadow hover:shadow-md">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
                     <flux:icon name="users" class="size-5 text-white" />
                 </div>
-                <flux:text class="text-sm font-semibold text-blue-600">Active Members</flux:text>
+                <p class="text-sm font-bold uppercase tracking-wide text-blue-600">Active Members</p>
             </div>
-            <p class="mt-4 text-4xl font-bold tracking-tight text-blue-700">{{ $this->stats->activeCount }}</p>
-            <p class="mt-1 text-xs text-blue-400">
+            <p class="mt-4 text-5xl font-extrabold tracking-tight text-blue-700">{{ $this->stats->activeCount }}</p>
+            <p class="mt-1.5 text-xs font-semibold text-blue-400">
                 {{ $this->stats->newThisMonth > 0 ? '+' . $this->stats->newThisMonth . ' new this month' : 'of ' . $this->stats->totalMembers . ' total' }}
             </p>
         </div>
@@ -249,21 +251,21 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         {{-- Revenue This Month --}}
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm transition-shadow hover:shadow-md">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 shadow-sm">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500 shadow-sm">
                     <flux:icon name="banknotes" class="size-5 text-white" />
                 </div>
-                <flux:text class="text-sm font-semibold text-emerald-600">Revenue ({{ now()->format('M') }})</flux:text>
+                <p class="text-sm font-bold uppercase tracking-wide text-emerald-600">Revenue ({{ now()->format('M') }})</p>
             </div>
-            <p class="mt-4 text-4xl font-bold tracking-tight text-emerald-700">
+            <p class="mt-4 text-4xl font-extrabold tracking-tight text-emerald-700">
                 RM {{ number_format($this->stats->revenueThisMonth, 0) }}
             </p>
             @if ($this->stats->revenueChange !== null)
-                <p class="mt-1 flex items-center gap-1 text-xs {{ $this->stats->revenueChange >= 0 ? 'text-emerald-500' : 'text-red-500' }}">
+                <p class="mt-1.5 flex items-center gap-1 text-xs font-semibold {{ $this->stats->revenueChange >= 0 ? 'text-emerald-500' : 'text-red-500' }}">
                     <flux:icon :name="$this->stats->revenueChange >= 0 ? 'arrow-trending-up' : 'arrow-trending-down'" class="size-3.5" />
                     {{ abs($this->stats->revenueChange) }}% vs last month
                 </p>
             @else
-                <p class="mt-1 text-xs text-emerald-400">RM {{ number_format($this->stats->revenueLastMonth, 0) }} last month</p>
+                <p class="mt-1.5 text-xs font-semibold text-emerald-400">RM {{ number_format($this->stats->revenueLastMonth, 0) }} last month</p>
             @endif
         </div>
 
@@ -272,18 +274,18 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
             {{ $hasPending ? 'border-orange-200 bg-orange-50' : 'border-zinc-200 bg-white' }}">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
                     {{ $hasPending ? 'bg-orange-500' : 'bg-zinc-200' }}">
                     <flux:icon name="clock" class="size-5 {{ $hasPending ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <flux:text class="text-sm font-semibold {{ $hasPending ? 'text-orange-600' : 'text-zinc-400' }}">
+                <p class="text-sm font-bold uppercase tracking-wide {{ $hasPending ? 'text-orange-600' : 'text-zinc-400' }}">
                     Not Paid Yet
-                </flux:text>
+                </p>
             </div>
-            <p class="mt-4 text-4xl font-bold tracking-tight {{ $hasPending ? 'text-orange-700' : 'text-zinc-300' }}">
+            <p class="mt-4 text-5xl font-extrabold tracking-tight {{ $hasPending ? 'text-orange-700' : 'text-zinc-300' }}">
                 {{ $this->stats->pendingThisMonth }}
             </p>
-            <p class="mt-1 text-xs {{ $hasPending ? 'text-orange-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-semibold {{ $hasPending ? 'text-orange-400' : 'text-zinc-400' }}">
                 active {{ Str::plural('member', $this->stats->pendingThisMonth) }} this month
             </p>
         </div>
@@ -293,18 +295,18 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
             {{ $hasVerify ? 'border-amber-200 bg-amber-50' : 'border-zinc-200 bg-white' }}">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
                     {{ $hasVerify ? 'bg-amber-400' : 'bg-zinc-200' }}">
                     <flux:icon name="document-check" class="size-5 {{ $hasVerify ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <flux:text class="text-sm font-semibold {{ $hasVerify ? 'text-amber-600' : 'text-zinc-400' }}">
+                <p class="text-sm font-bold uppercase tracking-wide {{ $hasVerify ? 'text-amber-600' : 'text-zinc-400' }}">
                     To Verify
-                </flux:text>
+                </p>
             </div>
-            <p class="mt-4 text-4xl font-bold tracking-tight {{ $hasVerify ? 'text-amber-700' : 'text-zinc-300' }}">
+            <p class="mt-4 text-5xl font-extrabold tracking-tight {{ $hasVerify ? 'text-amber-700' : 'text-zinc-300' }}">
                 {{ $this->stats->awaitingVerification }}
             </p>
-            <p class="mt-1 text-xs {{ $hasVerify ? 'text-amber-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-semibold {{ $hasVerify ? 'text-amber-400' : 'text-zinc-400' }}">
                 screenshot{{ $this->stats->awaitingVerification !== 1 ? 's' : '' }} pending review
             </p>
         </div>
@@ -317,15 +319,15 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         {{-- Total Collection --}}
         <div class="rounded-xl border border-teal-200 bg-teal-50 p-5 shadow-sm transition-shadow hover:shadow-md">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-teal-500 shadow-sm">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-teal-500 shadow-sm">
                     <flux:icon name="chart-bar" class="size-5 text-white" />
                 </div>
-                <flux:text class="text-sm font-semibold text-teal-600">Total Collection</flux:text>
+                <p class="text-sm font-bold uppercase tracking-wide text-teal-600">Total Collection</p>
             </div>
-            <p class="mt-4 text-3xl font-bold tracking-tight text-teal-700">
+            <p class="mt-4 text-4xl font-extrabold tracking-tight text-teal-700">
                 RM {{ number_format($this->stats->totalCollection, 2) }}
             </p>
-            <p class="mt-1 text-xs text-teal-400">All verified monthly + registration fees</p>
+            <p class="mt-1.5 text-xs font-semibold text-teal-400">All verified monthly + registration fees</p>
         </div>
 
         {{-- Pending Collection --}}
@@ -333,18 +335,18 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
             {{ $hasPendingAmount ? 'border-rose-200 bg-rose-50' : 'border-zinc-200 bg-white' }}">
             <div class="flex items-center gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
                     {{ $hasPendingAmount ? 'bg-rose-500' : 'bg-zinc-200' }}">
                     <flux:icon name="exclamation-triangle" class="size-5 {{ $hasPendingAmount ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <flux:text class="text-sm font-semibold {{ $hasPendingAmount ? 'text-rose-600' : 'text-zinc-400' }}">
+                <p class="text-sm font-bold uppercase tracking-wide {{ $hasPendingAmount ? 'text-rose-600' : 'text-zinc-400' }}">
                     Pending Collection
-                </flux:text>
+                </p>
             </div>
-            <p class="mt-4 text-3xl font-bold tracking-tight {{ $hasPendingAmount ? 'text-rose-700' : 'text-zinc-300' }}">
+            <p class="mt-4 text-4xl font-extrabold tracking-tight {{ $hasPendingAmount ? 'text-rose-700' : 'text-zinc-300' }}">
                 RM {{ number_format($this->stats->pendingCollection, 2) }}
             </p>
-            <p class="mt-1 text-xs {{ $hasPendingAmount ? 'text-rose-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-semibold {{ $hasPendingAmount ? 'text-rose-400' : 'text-zinc-400' }}">
                 Pending + overdue monthly fees outstanding
             </p>
         </div>
@@ -359,8 +361,8 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
                 <div class="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
                     <div>
-                        <flux:heading size="base">Recent Activity</flux:heading>
-                        <flux:text class="text-xs text-zinc-400">Latest 12 events</flux:text>
+                        <h3 class="text-base font-bold text-zinc-900 dark:text-white">Recent Activity</h3>
+                        <p class="text-xs font-medium text-zinc-400">Latest 12 events</p>
                     </div>
                     <flux:icon name="clock" class="size-4 text-zinc-300" />
                 </div>
@@ -404,10 +406,10 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                                     </div>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-zinc-800">{{ $event->text }}</p>
-                                    <p class="truncate text-xs text-zinc-400">{{ $event->sub }}</p>
+                                    <p class="truncate text-sm font-semibold text-zinc-800">{{ $event->text }}</p>
+                                    <p class="truncate text-xs font-medium text-zinc-400">{{ $event->sub }}</p>
                                 </div>
-                                <p class="shrink-0 whitespace-nowrap text-xs text-zinc-400">{{ $event->at->diffForHumans() }}</p>
+                                <p class="shrink-0 whitespace-nowrap text-xs font-medium text-zinc-400">{{ $event->at->diffForHumans() }}</p>
                             </a>
                         @endforeach
                     </div>
@@ -421,20 +423,20 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             {{-- Quick Actions --}}
             <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
                 <div class="border-b border-zinc-100 px-5 py-3.5">
-                    <flux:heading size="base">Quick Actions</flux:heading>
+                    <h3 class="text-base font-bold text-zinc-900 dark:text-white">Quick Actions</h3>
                 </div>
                 <div class="p-2">
                     <a href="{{ route('members.create') }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-blue-50">
-                        <div class="flex size-7 items-center justify-center rounded-lg bg-blue-100">
-                            <flux:icon name="user-plus" class="size-3.5 text-blue-600" />
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-blue-50">
+                        <div class="flex size-8 items-center justify-center rounded-lg bg-blue-100">
+                            <flux:icon name="user-plus" class="size-4 text-blue-600" />
                         </div>
                         Add Member
                     </a>
                     <a href="{{ route('payments.pending') }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50">
-                        <div class="flex size-7 items-center justify-center rounded-lg bg-amber-100">
-                            <flux:icon name="clock" class="size-3.5 text-amber-600" />
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-amber-50">
+                        <div class="flex size-8 items-center justify-center rounded-lg bg-amber-100">
+                            <flux:icon name="clock" class="size-4 text-amber-600" />
                         </div>
                         <span class="flex-1">Pending Payments</span>
                         @if ($this->stats->awaitingVerification > 0)
@@ -444,23 +446,23 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                         @endif
                     </a>
                     <a href="{{ route('payments.monthly') }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-violet-50">
-                        <div class="flex size-7 items-center justify-center rounded-lg bg-violet-100">
-                            <flux:icon name="calendar" class="size-3.5 text-violet-600" />
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-violet-50">
+                        <div class="flex size-8 items-center justify-center rounded-lg bg-violet-100">
+                            <flux:icon name="calendar" class="size-4 text-violet-600" />
                         </div>
                         Monthly Fees
                     </a>
                     <a href="{{ route('members.index') }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50">
-                        <div class="flex size-7 items-center justify-center rounded-lg bg-zinc-100">
-                            <flux:icon name="users" class="size-3.5 text-zinc-500" />
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50">
+                        <div class="flex size-8 items-center justify-center rounded-lg bg-zinc-100">
+                            <flux:icon name="users" class="size-4 text-zinc-500" />
                         </div>
                         All Members
                     </a>
                     <a href="{{ route('plans.index') }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-emerald-50">
-                        <div class="flex size-7 items-center justify-center rounded-lg bg-emerald-100">
-                            <flux:icon name="tag" class="size-3.5 text-emerald-600" />
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-emerald-50">
+                        <div class="flex size-8 items-center justify-center rounded-lg bg-emerald-100">
+                            <flux:icon name="tag" class="size-4 text-emerald-600" />
                         </div>
                         Membership Plans
                     </a>
@@ -470,7 +472,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             {{-- Member Status Breakdown --}}
             <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
                 <div class="border-b border-zinc-100 px-5 py-3.5">
-                    <flux:heading size="base">Member Breakdown</flux:heading>
+                    <h3 class="text-base font-bold text-zinc-900 dark:text-white">Member Breakdown</h3>
                 </div>
                 <div class="p-5">
                     @if ($this->statusBreakdown->isEmpty())
@@ -494,12 +496,12 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                                 <div>
                                     <div class="mb-1.5 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <div class="size-2 rounded-full {{ $barColor }}"></div>
-                                            <span class="text-sm text-zinc-600">{{ $s->label() }}</span>
+                                            <div class="size-2.5 rounded-full {{ $barColor }}"></div>
+                                            <span class="text-sm font-semibold text-zinc-700">{{ $s->label() }}</span>
                                         </div>
-                                        <span class="text-sm font-semibold text-zinc-800">
+                                        <span class="text-sm font-bold text-zinc-800">
                                             {{ $data->count }}
-                                            <span class="text-xs font-normal text-zinc-400">({{ $pct }}%)</span>
+                                            <span class="text-xs font-medium text-zinc-400">({{ $pct }}%)</span>
                                         </span>
                                     </div>
                                     <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
@@ -516,7 +518,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             @if ($this->planDistribution->isNotEmpty())
                 <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
                     <div class="border-b border-zinc-100 px-5 py-3.5">
-                        <flux:heading size="base">Plan Distribution</flux:heading>
+                        <h3 class="text-base font-bold text-zinc-900 dark:text-white">Plan Distribution</h3>
                     </div>
                     <div class="p-5">
                         <div class="space-y-3">
@@ -528,10 +530,10 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
                                 @endphp
                                 <div>
                                     <div class="mb-1.5 flex items-center justify-between text-sm">
-                                        <span class="text-zinc-600">{{ $plan->name }}</span>
-                                        <span class="font-semibold text-zinc-800">
+                                        <span class="font-semibold text-zinc-700">{{ $plan->name }}</span>
+                                        <span class="font-bold text-zinc-800">
                                             {{ $plan->active_count }}
-                                            <span class="text-xs font-normal text-zinc-400">({{ $pct }}%)</span>
+                                            <span class="text-xs font-medium text-zinc-400">({{ $pct }}%)</span>
                                         </span>
                                     </div>
                                     <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">

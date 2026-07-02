@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\MemberStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Member;
 use App\Models\MonthlyPayment;
 use Illuminate\Console\Command;
@@ -55,7 +56,7 @@ class GenerateMonthlyPayments extends Command
                     'billing_month' => $billingMonth,
                     'amount_due' => $member->currentPlan->monthly_fee_amount,
                     'due_date' => $dueDate,
-                    'status' => 'pending',
+                    'status' => PaymentStatus::Pending->value,
                 ]);
             }
 

@@ -202,12 +202,12 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
 }; ?>
 
 <div>
-    <div class="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div class="mx-auto max-w-4xl px-6 py-6 sm:px-8">
 
         {{-- Back nav --}}
         <div class="mb-6 flex items-center gap-3">
             <flux:button icon="arrow-left" variant="ghost" :href="route('members.index')" wire:navigate size="sm" />
-            <flux:text class="text-sm text-zinc-500">Back to Members</flux:text>
+            <flux:text class="text-sm font-medium text-zinc-500">Back to Members</flux:text>
         </div>
 
         <div class="grid gap-6 lg:grid-cols-3">
@@ -242,7 +242,7 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                                 Remove photo
                             </button>
                         @endif
-                        <flux:heading class="mt-3" size="lg">{{ $this->member->full_name }}</flux:heading>
+                        <h2 class="mt-3 text-lg font-bold text-zinc-900 dark:text-white">{{ $this->member->full_name }}</h2>
                         <flux:text class="mt-0.5 text-sm">{{ $this->member->registration_number }}</flux:text>
                         <div class="mt-2">
                             <flux:badge :color="$this->member->status->color()">
@@ -369,10 +369,10 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                 {{-- Current Plan --}}
                 @if ($this->member->currentPlan)
                     <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
-                        <flux:heading size="base" class="mb-4">Current Membership Plan</flux:heading>
+                        <h3 class="mb-4 text-base font-bold text-zinc-900 dark:text-white">Current Membership Plan</h3>
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-lg font-semibold text-zinc-900 dark:text-white">
+                                <p class="text-lg font-bold text-zinc-900 dark:text-white">
                                     {{ $this->member->currentPlan->membershipPlan->name }}
                                 </p>
                                 <flux:text class="text-sm">
@@ -380,10 +380,27 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                                 </flux:text>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-zinc-500">Monthly Fee</p>
-                                <p class="text-xl font-bold text-zinc-900 dark:text-white">
-                                    RM {{ number_format($this->member->currentPlan->monthly_fee_amount, 2) }}
-                                </p>
+                                @php
+                                    $plan = $this->member->currentPlan;
+                                    $hasDiscount = (float)$plan->discount_amount > 0;
+                                    $originalFee = $plan->membershipPlan->monthly_fee;
+                                @endphp
+                                @if ($hasDiscount)
+                                    <p class="text-xs text-zinc-400 line-through">
+                                        RM {{ number_format($originalFee, 2) }}
+                                    </p>
+                                    <p class="text-xl font-bold text-zinc-900 dark:text-white">
+                                        RM {{ number_format($plan->monthly_fee_amount, 2) }}
+                                    </p>
+                                    <p class="text-xs text-green-600">
+                                        {{ $plan->discount_type === 'percentage' ? $plan->discount_amount . '% off' : 'RM ' . number_format($plan->discount_amount, 2) . ' off' }}
+                                    </p>
+                                @else
+                                    <p class="text-sm text-zinc-500">Monthly Fee</p>
+                                    <p class="text-xl font-bold text-zinc-900 dark:text-white">
+                                        RM {{ number_format($plan->monthly_fee_amount, 2) }}
+                                    </p>
+                                @endif
                             </div>
                         </div>
 
@@ -429,7 +446,7 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                 {{-- Payment History --}}
                 <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
                     <div class="mb-4 flex items-center justify-between">
-                        <flux:heading size="base">Payment History</flux:heading>
+                        <h3 class="text-base font-bold text-zinc-900 dark:text-white">Payment History</h3>
                         <flux:text class="text-sm text-zinc-500">
                             {{ $this->member->monthlyPayments->count() }} month(s)
                         </flux:text>

@@ -115,8 +115,6 @@ new #[Layout('layouts.app'), Title('Registration Fees')] class extends Component
         RegistrationPayment::whereKey($this->actioningId)->update([
             'status'      => PaymentStatus::Rejected->value,
             'admin_notes' => $this->adminNotes ?: null,
-            'verified_at' => now(),
-            'verified_by' => auth()->id(),
         ]);
 
         unset($this->payments);
@@ -141,13 +139,13 @@ new #[Layout('layouts.app'), Title('Registration Fees')] class extends Component
 }; ?>
 
 <div>
-    <div class="flex flex-col gap-6 px-4 py-6 sm:px-6">
+    <div class="flex flex-col gap-6 px-6 py-6 sm:px-8">
 
         {{-- Header --}}
         <div class="flex items-center justify-between">
             <div>
-                <flux:heading size="xl">Registration Fees</flux:heading>
-                <flux:text class="mt-1">Track and verify one-time registration payments from all members.</flux:text>
+                <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">Registration Fees</h1>
+                <p class="mt-1 text-sm font-medium text-zinc-500">Track and verify one-time registration payments from all members.</p>
             </div>
         </div>
 
@@ -182,7 +180,7 @@ new #[Layout('layouts.app'), Title('Registration Fees')] class extends Component
                 <flux:table>
                     <thead>
                         <flux:table.row>
-                            <flux:table.column>Member</flux:table.column>
+                            <flux:table.column class="!ps-5">Member</flux:table.column>
                             <flux:table.column>Plan</flux:table.column>
                             <flux:table.column>Amount</flux:table.column>
                             <flux:table.column>Status</flux:table.column>
@@ -193,7 +191,7 @@ new #[Layout('layouts.app'), Title('Registration Fees')] class extends Component
                     <tbody>
                         @foreach ($this->payments as $payment)
                             <flux:table.row>
-                                <flux:table.cell>
+                                <flux:table.cell class="!ps-5">
                                     <flux:link :href="route('members.show', $payment->member)" wire:navigate class="font-medium">
                                         {{ $payment->member->full_name }}
                                     </flux:link>

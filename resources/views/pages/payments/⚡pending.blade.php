@@ -200,28 +200,24 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
 
     private function processAction(PaymentStatus $status): void
     {
-        $now = now();
+        $isApproval = in_array($status, [PaymentStatus::Verified, PaymentStatus::Waived]);
+        $stamp = $isApproval ? ['verified_at' => now(), 'verified_by' => auth()->id()] : [];
 
         if ($this->actioningType === 'registration') {
             $payment = RegistrationPayment::with('member')->findOrFail($this->actioningId);
-            $payment->update([
+            $payment->update(array_merge([
                 'status'      => $status->value,
                 'admin_notes' => $this->adminNotes ?: null,
-                'verified_at' => $now,
-                'verified_by' => auth()->id(),
-            ]);
+            ], $stamp));
 
-            // Activate member when registration is approved or waived
-            if (in_array($status, [PaymentStatus::Verified, PaymentStatus::Waived])) {
+            if ($isApproval) {
                 $payment->member->update(['status' => MemberStatus::Active->value]);
             }
         } else {
-            MonthlyPayment::whereKey($this->actioningId)->update([
+            MonthlyPayment::whereKey($this->actioningId)->update(array_merge([
                 'status'      => $status->value,
                 'admin_notes' => $this->adminNotes ?: null,
-                'verified_at' => $now,
-                'verified_by' => auth()->id(),
-            ]);
+            ], $stamp));
         }
 
         $this->clearComputed();
@@ -235,34 +231,52 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
 }; ?>
 
 <div>
-    <div class="flex flex-col gap-6 px-4 py-6 sm:px-6">
+    <div class="flex flex-col gap-6 px-6 py-6 sm:px-8">
 
         {{-- Header --}}
         <div>
-            <flux:heading size="xl">Pending Payments</flux:heading>
-            <flux:text class="mt-1">Review screenshots, verify or reject payments, and track overdue members.</flux:text>
+            <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">Pending Payments</h1>
+            <p class="mt-1 text-sm font-medium text-zinc-500">Review screenshots, verify or reject payments, and track overdue members.</p>
         </div>
 
         {{-- Summary Counters --}}
         <div class="grid grid-cols-3 gap-3">
-            <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-center dark:border-yellow-800 dark:bg-yellow-950">
-                <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{{ $this->awaitingVerification->count() }}</p>
-                <flux:text class="mt-1 text-xs text-yellow-600 dark:text-yellow-400">Awaiting Verification</flux:text>
+            <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-5 shadow-sm dark:border-yellow-800 dark:bg-yellow-950">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-yellow-400 shadow-sm">
+                        <flux:icon name="clock" class="size-5 text-white" />
+                    </div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-yellow-600">To Verify</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-yellow-700 dark:text-yellow-300">{{ $this->awaitingVerification->count() }}</p>
+                <p class="mt-1 text-xs font-semibold text-yellow-500">screenshots awaiting review</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white p-4 text-center dark:border-zinc-700 dark:bg-zinc-900">
-                <p class="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{{ $this->awaitingScreenshot->count() }}</p>
-                <flux:text class="mt-1 text-xs text-zinc-500">Awaiting Screenshot</flux:text>
+            <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-400 shadow-sm">
+                        <flux:icon name="arrow-up-tray" class="size-5 text-white" />
+                    </div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-zinc-500">No Screenshot</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-zinc-700 dark:text-zinc-300">{{ $this->awaitingScreenshot->count() }}</p>
+                <p class="mt-1 text-xs font-semibold text-zinc-400">payments without proof</p>
             </div>
-            <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-center dark:border-red-900 dark:bg-red-950">
-                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $this->overduePayments->count() }}</p>
-                <flux:text class="mt-1 text-xs text-red-500">Overdue</flux:text>
+            <div class="rounded-xl border border-red-200 bg-red-50 p-5 shadow-sm dark:border-red-900 dark:bg-red-950">
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-sm">
+                        <flux:icon name="exclamation-circle" class="size-5 text-white" />
+                    </div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-red-600">Overdue</p>
+                </div>
+                <p class="mt-3 text-4xl font-extrabold tracking-tight text-red-600 dark:text-red-400">{{ $this->overduePayments->count() }}</p>
+                <p class="mt-1 text-xs font-semibold text-red-400">past their due date</p>
             </div>
         </div>
 
         {{-- Section 1: Awaiting Verification --}}
         <div>
             <div class="mb-3 flex items-center gap-2">
-                <flux:heading size="base">Awaiting Your Verification</flux:heading>
+                <h3 class="text-base font-bold text-zinc-900 dark:text-white">Awaiting Your Verification</h3>
                 @if ($this->awaitingVerification->isNotEmpty())
                     <flux:badge color="yellow" size="sm">{{ $this->awaitingVerification->count() }}</flux:badge>
                 @endif
@@ -278,7 +292,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                     <flux:table>
                         <thead>
                             <flux:table.row>
-                                <flux:table.column>Member</flux:table.column>
+                                <flux:table.column class="!ps-5">Member</flux:table.column>
                                 <flux:table.column>Payment</flux:table.column>
                                 <flux:table.column>Amount</flux:table.column>
                                 <flux:table.column>Submitted</flux:table.column>
@@ -289,7 +303,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                         <tbody>
                             @foreach ($this->awaitingVerification as $item)
                                 <flux:table.row>
-                                    <flux:table.cell>
+                                    <flux:table.cell class="!ps-5">
                                         <p class="font-medium text-zinc-900 dark:text-white">{{ $item->member->full_name }}</p>
                                         <p class="text-xs text-zinc-500">{{ $item->member->registration_number }}</p>
                                     </flux:table.cell>
@@ -350,7 +364,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
         {{-- Section 2: Awaiting Screenshot --}}
         <div>
             <div class="mb-3 flex items-center gap-2">
-                <flux:heading size="base">Awaiting Payment Screenshot</flux:heading>
+                <h3 class="text-base font-bold text-zinc-900 dark:text-white">Awaiting Payment Screenshot</h3>
                 @if ($this->awaitingScreenshot->isNotEmpty())
                     <flux:badge color="zinc" size="sm">{{ $this->awaitingScreenshot->count() }}</flux:badge>
                 @endif
@@ -365,7 +379,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                     <flux:table>
                         <thead>
                             <flux:table.row>
-                                <flux:table.column>Member</flux:table.column>
+                                <flux:table.column class="!ps-5">Member</flux:table.column>
                                 <flux:table.column>Payment</flux:table.column>
                                 <flux:table.column>Amount</flux:table.column>
                                 <flux:table.column>Actions</flux:table.column>
@@ -374,7 +388,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                         <tbody>
                             @foreach ($this->awaitingScreenshot as $item)
                                 <flux:table.row>
-                                    <flux:table.cell>
+                                    <flux:table.cell class="!ps-5">
                                         <p class="font-medium text-zinc-900 dark:text-white">{{ $item->member->full_name }}</p>
                                         <p class="text-xs text-zinc-500">{{ $item->member->registration_number }}</p>
                                     </flux:table.cell>
@@ -416,7 +430,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
         @if ($this->overduePayments->isNotEmpty())
             <div>
                 <div class="mb-3 flex items-center gap-2">
-                    <flux:heading size="base" class="text-red-600 dark:text-red-400">Overdue Payments</flux:heading>
+                    <h3 class="text-base font-bold text-red-600 dark:text-red-400">Overdue Payments</h3>
                     <flux:badge color="red" size="sm">{{ $this->overduePayments->count() }}</flux:badge>
                 </div>
 
@@ -424,7 +438,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                     <flux:table>
                         <thead>
                             <flux:table.row>
-                                <flux:table.column>Member</flux:table.column>
+                                <flux:table.column class="!ps-5">Member</flux:table.column>
                                 <flux:table.column>Payment</flux:table.column>
                                 <flux:table.column>Amount</flux:table.column>
                                 <flux:table.column>Due Date</flux:table.column>
@@ -434,7 +448,7 @@ new #[Layout('layouts.app'), Title('Pending Payments')] class extends Component 
                         <tbody>
                             @foreach ($this->overduePayments as $item)
                                 <flux:table.row>
-                                    <flux:table.cell>
+                                    <flux:table.cell class="!ps-5">
                                         <p class="font-medium text-zinc-900 dark:text-white">{{ $item->member->full_name }}</p>
                                         <p class="text-xs text-zinc-500">{{ $item->member->registration_number }}</p>
                                     </flux:table.cell>

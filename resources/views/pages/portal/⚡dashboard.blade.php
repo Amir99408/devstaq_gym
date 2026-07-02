@@ -26,7 +26,7 @@ new #[Layout('layouts.portal'), Title('My Dashboard')] class extends Component {
             'user',
             'currentPlan.membershipPlan',
             'registrationPayment',
-            'currentMonthPayment',
+            'currentMonthPayment.verifiedBy',
         ])->where('user_id', auth()->id())->firstOrFail();
     }
 

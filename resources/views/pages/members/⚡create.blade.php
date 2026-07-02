@@ -44,6 +44,12 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
     #[Validate('required|integer|exists:membership_plans,id')]
     public string $membership_plan_id = '';
 
+    #[Validate('nullable|in:fixed,percentage')]
+    public string $discount_type = 'fixed';
+
+    #[Validate('nullable|numeric|min:0')]
+    public string $discount_amount = '';
+
     #[Computed]
     public function plans(): Collection
     {
@@ -58,6 +64,27 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
         }
 
         return $this->plans->firstWhere('id', $this->membership_plan_id);
+    }
+
+    #[Computed]
+    public function finalMonthlyFee(): float
+    {
+        if (! $this->selectedPlan) {
+            return 0;
+        }
+
+        $base     = (float) $this->selectedPlan->monthly_fee;
+        $discount = (float) ($this->discount_amount ?: 0);
+
+        if ($discount <= 0) {
+            return $base;
+        }
+
+        $final = $this->discount_type === 'percentage'
+            ? $base - ($base * $discount / 100)
+            : $base - $discount;
+
+        return max(0, $final);
     }
 
     public function save(): void
@@ -81,12 +108,14 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
             ]);
 
             $memberPlan = MemberPlan::create([
-                'member_id' => $member->id,
-                'membership_plan_id' => $plan->id,
+                'member_id'               => $member->id,
+                'membership_plan_id'      => $plan->id,
                 'registration_fee_amount' => $plan->registration_fee,
-                'monthly_fee_amount' => $plan->monthly_fee,
-                'start_date' => today()->toDateString(),
-                'created_by' => auth()->id(),
+                'monthly_fee_amount'      => $this->finalMonthlyFee,
+                'discount_type'           => $this->discount_type,
+                'discount_amount'         => (float) ($this->discount_amount ?: 0),
+                'start_date'              => today()->toDateString(),
+                'created_by'              => auth()->id(),
             ]);
 
             RegistrationPayment::create([
@@ -106,14 +135,14 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+<div class="mx-auto max-w-3xl px-6 py-6 sm:px-8">
 
         {{-- Header --}}
         <div class="mb-6 flex items-center gap-3">
             <flux:button icon="arrow-left" variant="ghost" :href="route('members.index')" wire:navigate size="sm" />
             <div>
-                <flux:heading size="xl">Add New Member</flux:heading>
-                <flux:text class="mt-0.5">Fill in the member details and select a membership plan.</flux:text>
+                <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">Add New Member</h1>
+                <p class="mt-0.5 text-sm font-medium text-zinc-500">Fill in the member details and select a membership plan.</p>
             </div>
         </div>
 
@@ -121,7 +150,7 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
 
             {{-- Personal Information --}}
             <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:heading size="base" class="mb-4">Personal Information</flux:heading>
+                <h3 class="mb-4 text-base font-bold text-zinc-900 dark:text-white">Personal Information</h3>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <flux:input
@@ -158,8 +187,8 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
 
             {{-- Emergency Contact --}}
             <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:heading size="base" class="mb-1">Emergency Contact</flux:heading>
-                <flux:text class="mb-4 text-sm">Optional but recommended.</flux:text>
+                <h3 class="mb-1 text-base font-bold text-zinc-900 dark:text-white">Emergency Contact</h3>
+                <p class="mb-4 text-sm text-zinc-500">Optional but recommended.</p>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <flux:input wire:model="emergency_contact_name" label="Contact Name" placeholder="Contact person name" />
                     <flux:input wire:model="emergency_contact_phone" label="Contact Phone" placeholder="+60 11-9999 8888" type="tel" />
@@ -168,7 +197,7 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
 
             {{-- Membership Plan --}}
             <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:heading size="base" class="mb-4">Membership Plan</flux:heading>
+                <h3 class="mb-4 text-base font-bold text-zinc-900 dark:text-white">Membership Plan</h3>
 
                 @if ($this->plans->isEmpty())
                     <div class="rounded-lg bg-yellow-50 p-4 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
@@ -208,9 +237,36 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
 
+                    {{-- Discount --}}
+                    @if ($this->selectedPlan)
+                        <div class="mt-4 rounded-lg border border-dashed border-zinc-300 p-4">
+                            <flux:text class="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Discount (Optional)</flux:text>
+                            <div class="flex gap-3">
+                                <div class="w-36 shrink-0">
+                                    <flux:select wire:model.live="discount_type" size="sm">
+                                        <flux:select.option value="fixed">Fixed (RM)</flux:select.option>
+                                        <flux:select.option value="percentage">Percentage (%)</flux:select.option>
+                                    </flux:select>
+                                </div>
+                                <div class="flex-1">
+                                    <flux:input
+                                        wire:model.live="discount_amount"
+                                        type="number"
+                                        min="0"
+                                        :max="$discount_type === 'percentage' ? 100 : $this->selectedPlan->monthly_fee"
+                                        step="0.01"
+                                        :placeholder="$discount_type === 'percentage' ? 'e.g. 10 for 10%' : 'e.g. 200'"
+                                        size="sm"
+                                    />
+                                </div>
+                            </div>
+                            @error('discount_amount') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
+
                     {{-- Fee Preview --}}
                     @if ($this->selectedPlan)
-                        <div class="mt-4 rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800">
+                        <div class="mt-3 rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800">
                             <flux:text class="text-xs font-medium uppercase tracking-wider text-zinc-500">Fee Summary</flux:text>
                             <div class="mt-2 space-y-1">
                                 <div class="flex justify-between text-sm">
@@ -225,10 +281,28 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-zinc-600 dark:text-zinc-400">Monthly fee</span>
-                                    <span class="font-medium text-zinc-900 dark:text-white">
-                                        RM {{ number_format($this->selectedPlan->monthly_fee, 2) }}/month
+                                    <span class="text-zinc-500">
+                                        RM {{ number_format($this->selectedPlan->monthly_fee, 2) }}
                                     </span>
                                 </div>
+                                @if ((float)($discount_amount ?: 0) > 0)
+                                    <div class="flex justify-between text-sm text-green-600">
+                                        <span>
+                                            Discount
+                                            ({{ $discount_type === 'percentage' ? $discount_amount . '%' : 'RM ' . number_format($discount_amount, 2) }})
+                                        </span>
+                                        <span>− RM {{ number_format($this->selectedPlan->monthly_fee - $this->finalMonthlyFee, 2) }}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-zinc-200 pt-1 text-sm font-semibold">
+                                        <span class="text-zinc-700 dark:text-zinc-300">Final monthly fee</span>
+                                        <span class="text-blue-700">RM {{ number_format($this->finalMonthlyFee, 2) }}/month</span>
+                                    </div>
+                                @else
+                                    <div class="flex justify-between text-sm font-medium">
+                                        <span class="text-zinc-700 dark:text-zinc-300">Final monthly fee</span>
+                                        <span class="text-zinc-900 dark:text-white">RM {{ number_format($this->finalMonthlyFee, 2) }}/month</span>
+                                    </div>
+                                @endif
                             </div>
                             @if ($this->selectedPlan->registration_fee > 0)
                                 <p class="mt-3 text-xs text-zinc-500">
