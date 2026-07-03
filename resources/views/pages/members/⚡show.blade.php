@@ -205,9 +205,14 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
         if (! $plan) {
             return null;
         }
-        $billingDay = $plan->billing_day ?? 1;
-        $today = today();
-        return Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
+
+        $billingDay        = $plan->billing_day ?? 1;
+        $today             = today();
+        $firstBillingMonth = $plan->start_date->copy()->addMonth()->startOfMonth();
+        $firstBillingDate  = Carbon::create($firstBillingMonth->year, $firstBillingMonth->month, min($billingDay, $firstBillingMonth->daysInMonth));
+        $thisMonthDue      = Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
+
+        return $thisMonthDue->lt($firstBillingDate) ? $firstBillingDate : $thisMonthDue;
     }
 
     #[Computed]

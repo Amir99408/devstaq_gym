@@ -132,17 +132,20 @@ class Member extends Model
             return null;
         }
 
-        $billingDay = $plan->billing_day ?? 1;
-        $today = today();
-        $thisMonthDue = Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
+        $billingDay       = $plan->billing_day ?? 1;
+        $today            = today();
+        $firstBillingMonth = $plan->start_date->copy()->addMonth()->startOfMonth();
+        $firstBillingDate  = Carbon::create($firstBillingMonth->year, $firstBillingMonth->month, min($billingDay, $firstBillingMonth->daysInMonth));
+        $thisMonthDue      = Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
 
-        if ($today->lt($thisMonthDue)) {
+        if ($today->lt($thisMonthDue) && $thisMonthDue->gte($firstBillingDate)) {
             return $thisMonthDue;
         }
 
         $nextMonth = $today->copy()->addMonth()->startOfMonth();
+        $nextDue   = Carbon::create($nextMonth->year, $nextMonth->month, min($billingDay, $nextMonth->daysInMonth));
 
-        return Carbon::create($nextMonth->year, $nextMonth->month, min($billingDay, $nextMonth->daysInMonth));
+        return $nextDue->gte($firstBillingDate) ? $nextDue : $firstBillingDate;
     }
 
     public function whatsappReminderUrl(float $amount, Carbon $dueDate): ?string
