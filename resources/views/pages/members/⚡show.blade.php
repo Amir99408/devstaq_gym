@@ -447,7 +447,7 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                         @php
                             $currentDue    = $this->currentPeriodDueDate;
                             $thisMonthPay  = $this->thisMonthPayment;
-                            $isVerified    = $thisMonthPay?->status === PaymentStatus::Verified;
+                            $isVerified    = $thisMonthPay?->status === \App\Enums\PaymentStatus::Verified;
                             $isDue         = $currentDue && today()->gte($currentDue);
                             $waActive      = $isDue && ! $isVerified;
                             $waUrl         = $currentDue
