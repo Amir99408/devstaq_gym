@@ -136,7 +136,7 @@ class Member extends Model
         $today = today();
         $thisMonthDue = Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
 
-        if ($today->lte($thisMonthDue)) {
+        if ($today->lt($thisMonthDue)) {
             return $thisMonthDue;
         }
 

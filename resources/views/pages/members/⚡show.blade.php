@@ -199,6 +199,25 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
     }
 
     #[Computed]
+    public function currentPeriodDueDate(): ?Carbon
+    {
+        $plan = $this->member->currentPlan;
+        if (! $plan) {
+            return null;
+        }
+        $billingDay = $plan->billing_day ?? 1;
+        $today = today();
+        return Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
+    }
+
+    #[Computed]
+    public function thisMonthPayment()
+    {
+        return $this->member->monthlyPayments
+            ->first(fn ($p) => $p->billing_month->isSameMonth(today()));
+    }
+
+    #[Computed]
     public function availableStatuses(): array
     {
         return collect(MemberStatus::cases())
@@ -424,21 +443,66 @@ new #[Layout('layouts.app'), Title('Member Profile')] class extends Component {
                             </div>
                         </div>
 
-                        {{-- Next Payment Due + WhatsApp Reminder --}}
-                        @if ($this->nextPaymentDueDate)
-                            <div class="mt-4 flex items-center justify-between rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950/40">
-                                <div>
-                                    <p class="text-xs font-medium text-green-700 dark:text-green-400">Next Payment Due</p>
-                                    <p class="text-sm font-bold text-green-800 dark:text-green-300">{{ $this->nextPaymentDueDate->format('d M Y') }}</p>
+                        {{-- Payment Due Status + WhatsApp Reminder --}}
+                        @php
+                            $currentDue    = $this->currentPeriodDueDate;
+                            $thisMonthPay  = $this->thisMonthPayment;
+                            $isVerified    = $thisMonthPay?->status === PaymentStatus::Verified;
+                            $isDue         = $currentDue && today()->gte($currentDue);
+                            $waActive      = $isDue && ! $isVerified;
+                            $waUrl         = $currentDue
+                                ? $this->member->whatsappReminderUrl((float) $plan->monthly_fee_amount, $currentDue)
+                                : null;
+
+                            if ($isVerified) {
+                                $cardBg    = 'bg-green-50 border-green-100';
+                                $labelCls  = 'text-green-600';
+                                $dateCls   = 'text-green-800';
+                                $cardLabel = 'This Month — Paid';
+                                $waTip     = 'Payment verified — no reminder needed.';
+                            } elseif ($isDue) {
+                                $cardBg    = 'bg-orange-50 border-orange-100';
+                                $labelCls  = 'text-orange-600';
+                                $dateCls   = 'text-orange-800';
+                                $daysLate  = today()->gt($currentDue) ? today()->diffInDays($currentDue) : 0;
+                                $cardLabel = $daysLate > 0 ? 'Payment Overdue' : 'Due Today';
+                                $waTip     = $daysLate > 0
+                                    ? "Overdue by {$daysLate} day(s) — send a reminder."
+                                    : 'Fee is due today — send a reminder.';
+                            } else {
+                                $cardBg    = 'bg-blue-50 border-blue-100';
+                                $labelCls  = 'text-blue-500';
+                                $dateCls   = 'text-blue-800';
+                                $daysLeft  = today()->diffInDays($currentDue);
+                                $cardLabel = 'Next Payment Due';
+                                $waTip     = "Not due yet — due in {$daysLeft} day(s).";
+                            }
+                        @endphp
+                        @if ($currentDue)
+                            <div class="mt-4 rounded-lg border {{ $cardBg }} px-4 py-3">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-medium {{ $labelCls }}">{{ $cardLabel }}</p>
+                                        <p class="text-sm font-bold {{ $dateCls }}">{{ $currentDue->format('d M Y') }}</p>
+                                    </div>
+                                    @if ($waUrl)
+                                        <div class="flex flex-col items-end gap-1">
+                                            @if ($waActive)
+                                                <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer"
+                                                   class="flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-600">
+                                                    <svg class="size-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                                    Send Reminder
+                                                </a>
+                                            @else
+                                                <span class="flex cursor-not-allowed select-none items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-400">
+                                                    <svg class="size-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                                    Send Reminder
+                                                </span>
+                                            @endif
+                                            <p class="max-w-[160px] text-right text-[10px] leading-tight text-zinc-400">{{ $waTip }}</p>
+                                        </div>
+                                    @endif
                                 </div>
-                                @php $waUrl = $this->member->whatsappReminderUrl((float)$plan->monthly_fee_amount, $this->nextPaymentDueDate); @endphp
-                                @if ($waUrl)
-                                    <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer"
-                                       class="flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-600">
-                                        <svg class="size-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                        Send Reminder
-                                    </a>
-                                @endif
                             </div>
                         @endif
 
