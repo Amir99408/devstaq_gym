@@ -115,6 +115,7 @@ new #[Layout('layouts.app'), Title('Add Member')] class extends Component {
                 'discount_type'           => $this->discount_type,
                 'discount_amount'         => (float) ($this->discount_amount ?: 0),
                 'start_date'              => today()->toDateString(),
+                'billing_day'             => today()->day,
                 'created_by'              => auth()->id(),
             ]);
 

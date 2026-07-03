@@ -11,7 +11,7 @@ class MemberPlan extends Model
     protected $fillable = [
         'member_id', 'membership_plan_id', 'registration_fee_amount',
         'monthly_fee_amount', 'discount_type', 'discount_amount',
-        'start_date', 'end_date', 'created_by',
+        'start_date', 'end_date', 'billing_day', 'created_by',
     ];
 
     protected function casts(): array
@@ -22,6 +22,7 @@ class MemberPlan extends Model
             'discount_amount'         => 'decimal:2',
             'start_date'              => 'date',
             'end_date'                => 'date',
+            'billing_day'             => 'integer',
         ];
     }
 

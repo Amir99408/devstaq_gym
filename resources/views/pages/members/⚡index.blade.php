@@ -89,22 +89,42 @@ new #[Layout('layouts.app'), Title('Members')] class extends Component {
         </div>
 
         {{-- Stats Bar --}}
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
-                <p class="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Active</p>
-                <p class="mt-2 text-3xl font-extrabold text-zinc-900 dark:text-white">{{ $this->totalActive }}</p>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-blue-500">Total Active</p>
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
+                        <flux:icon name="users" class="size-4 text-white" />
+                    </div>
+                </div>
+                <p class="mt-4 text-4xl font-extrabold tracking-tight text-blue-800">{{ $this->totalActive }}</p>
             </div>
-            <div class="rounded-xl border border-orange-200 bg-orange-50 p-5 dark:border-orange-900 dark:bg-orange-950">
-                <p class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Pending This Month</p>
-                <p class="mt-2 text-3xl font-extrabold text-orange-600 dark:text-orange-400">{{ $this->pendingThisMonth }}</p>
+            <div class="rounded-2xl border border-orange-100 bg-orange-50 p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-orange-500">Pending This Month</p>
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-sm">
+                        <flux:icon name="clock" class="size-4 text-white" />
+                    </div>
+                </div>
+                <p class="mt-4 text-4xl font-extrabold tracking-tight text-orange-700">{{ $this->pendingThisMonth }}</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
-                <p class="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Members</p>
-                <p class="mt-2 text-3xl font-extrabold text-zinc-900 dark:text-white">{{ $this->members->total() }}</p>
+            <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total Members</p>
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-zinc-400 shadow-sm">
+                        <flux:icon name="user-group" class="size-4 text-white" />
+                    </div>
+                </div>
+                <p class="mt-4 text-4xl font-extrabold tracking-tight text-zinc-700">{{ $this->members->total() }}</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
-                <p class="text-xs font-bold uppercase tracking-wider text-zinc-500">Showing</p>
-                <p class="mt-2 text-3xl font-extrabold text-zinc-900 dark:text-white">{{ $this->members->count() }}</p>
+            <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Showing</p>
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-zinc-400 shadow-sm">
+                        <flux:icon name="funnel" class="size-4 text-white" />
+                    </div>
+                </div>
+                <p class="mt-4 text-4xl font-extrabold tracking-tight text-zinc-700">{{ $this->members->count() }}</p>
             </div>
         </div>
 

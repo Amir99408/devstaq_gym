@@ -24,7 +24,6 @@ class GenerateMonthlyPayments extends Command
             : now()->startOfMonth();
 
         $billingMonth = $month->toDateString();
-        $dueDate = $month->copy()->addDays(7)->toDateString();
 
         $this->info("Generating payments for: {$month->format('F Y')}");
 
@@ -50,18 +49,23 @@ class GenerateMonthlyPayments extends Command
                 continue;
             }
 
+            // Use the member's personal billing day; clamp to last day of month
+            // to handle months shorter than the billing day (e.g. day 31 in Feb)
+            $billingDay = $member->currentPlan->billing_day ?? 1;
+            $dueDate    = $month->copy()->setDay(min($billingDay, $month->daysInMonth))->toDateString();
+
             if (! $this->option('dry-run')) {
                 MonthlyPayment::create([
-                    'member_id' => $member->id,
+                    'member_id'     => $member->id,
                     'billing_month' => $billingMonth,
-                    'amount_due' => $member->currentPlan->monthly_fee_amount,
-                    'due_date' => $dueDate,
-                    'status' => PaymentStatus::Pending->value,
+                    'amount_due'    => $member->currentPlan->monthly_fee_amount,
+                    'due_date'      => $dueDate,
+                    'status'        => PaymentStatus::Pending->value,
                 ]);
             }
 
             $created++;
-            $this->line("  Created: {$member->full_name} — RM {$member->currentPlan->monthly_fee_amount}");
+            $this->line("  Created: {$member->full_name} — RM {$member->currentPlan->monthly_fee_amount} — due {$dueDate}");
         }
 
         $this->info("Done. Created: {$created}, Skipped: {$skipped}");

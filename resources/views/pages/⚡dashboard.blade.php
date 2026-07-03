@@ -200,9 +200,9 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         <div class="flex flex-col gap-2 sm:flex-row">
             @if ($this->stats->awaitingVerification > 0)
                 <a href="{{ route('payments.pending') }}" wire:navigate
-                   class="flex flex-1 items-center gap-3 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 transition-colors hover:bg-yellow-100 dark:border-yellow-700/50 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30">
-                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/50">
-                        <flux:icon name="bell-alert" class="size-4 text-yellow-600 dark:text-yellow-400" />
+                   class="flex flex-1 items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 transition-colors hover:bg-amber-100">
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-400">
+                        <flux:icon name="bell-alert" class="size-4 text-white" />
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
@@ -215,9 +215,9 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             @endif
             @if ($this->stats->overdueCount > 0)
                 <a href="{{ route('payments.pending') }}" wire:navigate
-                   class="flex flex-1 items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100 dark:border-red-700/50 dark:bg-red-900/20 dark:hover:bg-red-900/30">
-                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/50">
-                        <flux:icon name="exclamation-circle" class="size-4 text-red-600 dark:text-red-400" />
+                   class="flex flex-1 items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 transition-colors hover:bg-red-100">
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-red-500">
+                        <flux:icon name="exclamation-circle" class="size-4 text-white" />
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-sm font-semibold text-red-800 dark:text-red-200">
@@ -232,81 +232,75 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
     @endif
 
     {{-- Stats Row --}}
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 
         {{-- Active Members --}}
-        <div class="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
-                    <flux:icon name="users" class="size-5 text-white" />
+        <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm transition-all hover:shadow-md">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-500">Active Members</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-500 shadow-sm">
+                    <flux:icon name="users" class="size-4 text-white" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide text-blue-600">Active Members</p>
             </div>
-            <p class="mt-4 text-5xl font-extrabold tracking-tight text-blue-700">{{ $this->stats->activeCount }}</p>
-            <p class="mt-1.5 text-xs font-semibold text-blue-400">
-                {{ $this->stats->newThisMonth > 0 ? '+' . $this->stats->newThisMonth . ' new this month' : 'of ' . $this->stats->totalMembers . ' total' }}
+            <p class="mt-5 text-5xl font-extrabold tracking-tight text-blue-800">{{ $this->stats->activeCount }}</p>
+            <p class="mt-1.5 text-xs font-medium text-blue-400">
+                {{ $this->stats->newThisMonth > 0 ? '+' . $this->stats->newThisMonth . ' joined this month' : 'of ' . $this->stats->totalMembers . ' total' }}
             </p>
         </div>
 
         {{-- Revenue This Month --}}
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500 shadow-sm">
-                    <flux:icon name="banknotes" class="size-5 text-white" />
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm transition-all hover:shadow-md">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Revenue ({{ now()->format('M') }})</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 shadow-sm">
+                    <flux:icon name="banknotes" class="size-4 text-white" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide text-emerald-600">Revenue ({{ now()->format('M') }})</p>
             </div>
-            <p class="mt-4 text-4xl font-extrabold tracking-tight text-emerald-700">
+            <p class="mt-5 text-4xl font-extrabold tracking-tight text-emerald-800">
                 RM {{ number_format($this->stats->revenueThisMonth, 0) }}
             </p>
             @if ($this->stats->revenueChange !== null)
-                <p class="mt-1.5 flex items-center gap-1 text-xs font-semibold {{ $this->stats->revenueChange >= 0 ? 'text-emerald-500' : 'text-red-500' }}">
+                <p class="mt-1.5 flex items-center gap-1 text-xs font-semibold {{ $this->stats->revenueChange >= 0 ? 'text-emerald-600' : 'text-red-500' }}">
                     <flux:icon :name="$this->stats->revenueChange >= 0 ? 'arrow-trending-up' : 'arrow-trending-down'" class="size-3.5" />
                     {{ abs($this->stats->revenueChange) }}% vs last month
                 </p>
             @else
-                <p class="mt-1.5 text-xs font-semibold text-emerald-400">RM {{ number_format($this->stats->revenueLastMonth, 0) }} last month</p>
+                <p class="mt-1.5 text-xs font-medium text-emerald-400">RM {{ number_format($this->stats->revenueLastMonth, 0) }} last month</p>
             @endif
         </div>
 
         {{-- Not Paid Yet --}}
         @php $hasPending = $this->stats->pendingThisMonth > 0; @endphp
-        <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
-            {{ $hasPending ? 'border-orange-200 bg-orange-50' : 'border-zinc-200 bg-white' }}">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
-                    {{ $hasPending ? 'bg-orange-500' : 'bg-zinc-200' }}">
-                    <flux:icon name="clock" class="size-5 {{ $hasPending ? 'text-white' : 'text-zinc-400' }}" />
+        <div class="rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md
+            {{ $hasPending ? 'border-orange-100 bg-orange-50' : 'border-zinc-100 bg-zinc-50' }}">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider {{ $hasPending ? 'text-orange-500' : 'text-zinc-400' }}">Not Paid Yet</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl shadow-sm {{ $hasPending ? 'bg-orange-500' : 'bg-zinc-200' }}">
+                    <flux:icon name="clock" class="size-4 {{ $hasPending ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide {{ $hasPending ? 'text-orange-600' : 'text-zinc-400' }}">
-                    Not Paid Yet
-                </p>
             </div>
-            <p class="mt-4 text-5xl font-extrabold tracking-tight {{ $hasPending ? 'text-orange-700' : 'text-zinc-300' }}">
+            <p class="mt-5 text-5xl font-extrabold tracking-tight {{ $hasPending ? 'text-orange-700' : 'text-zinc-300' }}">
                 {{ $this->stats->pendingThisMonth }}
             </p>
-            <p class="mt-1.5 text-xs font-semibold {{ $hasPending ? 'text-orange-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-medium {{ $hasPending ? 'text-orange-400' : 'text-zinc-400' }}">
                 active {{ Str::plural('member', $this->stats->pendingThisMonth) }} this month
             </p>
         </div>
 
         {{-- To Verify --}}
         @php $hasVerify = $this->stats->awaitingVerification > 0; @endphp
-        <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
-            {{ $hasVerify ? 'border-amber-200 bg-amber-50' : 'border-zinc-200 bg-white' }}">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
-                    {{ $hasVerify ? 'bg-amber-400' : 'bg-zinc-200' }}">
-                    <flux:icon name="document-check" class="size-5 {{ $hasVerify ? 'text-white' : 'text-zinc-400' }}" />
+        <div class="rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md
+            {{ $hasVerify ? 'border-violet-100 bg-violet-50' : 'border-zinc-100 bg-zinc-50' }}">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider {{ $hasVerify ? 'text-violet-500' : 'text-zinc-400' }}">To Verify</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl shadow-sm {{ $hasVerify ? 'bg-violet-500' : 'bg-zinc-200' }}">
+                    <flux:icon name="document-check" class="size-4 {{ $hasVerify ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide {{ $hasVerify ? 'text-amber-600' : 'text-zinc-400' }}">
-                    To Verify
-                </p>
             </div>
-            <p class="mt-4 text-5xl font-extrabold tracking-tight {{ $hasVerify ? 'text-amber-700' : 'text-zinc-300' }}">
+            <p class="mt-5 text-5xl font-extrabold tracking-tight {{ $hasVerify ? 'text-violet-700' : 'text-zinc-300' }}">
                 {{ $this->stats->awaitingVerification }}
             </p>
-            <p class="mt-1.5 text-xs font-semibold {{ $hasVerify ? 'text-amber-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-medium {{ $hasVerify ? 'text-violet-400' : 'text-zinc-400' }}">
                 screenshot{{ $this->stats->awaitingVerification !== 1 ? 's' : '' }} pending review
             </p>
         </div>
@@ -314,39 +308,36 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
     </div>
 
     {{-- Collection Row --}}
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
         {{-- Total Collection --}}
-        <div class="rounded-xl border border-teal-200 bg-teal-50 p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-teal-500 shadow-sm">
-                    <flux:icon name="chart-bar" class="size-5 text-white" />
+        <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-5 shadow-sm transition-all hover:shadow-md">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-indigo-500">Total Collection</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500 shadow-sm">
+                    <flux:icon name="chart-bar" class="size-4 text-white" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide text-teal-600">Total Collection</p>
             </div>
-            <p class="mt-4 text-4xl font-extrabold tracking-tight text-teal-700">
+            <p class="mt-5 text-4xl font-extrabold tracking-tight text-indigo-800">
                 RM {{ number_format($this->stats->totalCollection, 2) }}
             </p>
-            <p class="mt-1.5 text-xs font-semibold text-teal-400">All verified monthly + registration fees</p>
+            <p class="mt-1.5 text-xs font-medium text-indigo-400">All verified monthly + registration fees</p>
         </div>
 
         {{-- Pending Collection --}}
         @php $hasPendingAmount = $this->stats->pendingCollection > 0; @endphp
-        <div class="rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md
-            {{ $hasPendingAmount ? 'border-rose-200 bg-rose-50' : 'border-zinc-200 bg-white' }}">
-            <div class="flex items-center gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-sm
-                    {{ $hasPendingAmount ? 'bg-rose-500' : 'bg-zinc-200' }}">
-                    <flux:icon name="exclamation-triangle" class="size-5 {{ $hasPendingAmount ? 'text-white' : 'text-zinc-400' }}" />
+        <div class="rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md
+            {{ $hasPendingAmount ? 'border-red-100 bg-red-50' : 'border-zinc-100 bg-zinc-50' }}">
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold uppercase tracking-wider {{ $hasPendingAmount ? 'text-red-500' : 'text-zinc-400' }}">Pending Collection</p>
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl shadow-sm {{ $hasPendingAmount ? 'bg-red-500' : 'bg-zinc-200' }}">
+                    <flux:icon name="exclamation-triangle" class="size-4 {{ $hasPendingAmount ? 'text-white' : 'text-zinc-400' }}" />
                 </div>
-                <p class="text-sm font-bold uppercase tracking-wide {{ $hasPendingAmount ? 'text-rose-600' : 'text-zinc-400' }}">
-                    Pending Collection
-                </p>
             </div>
-            <p class="mt-4 text-4xl font-extrabold tracking-tight {{ $hasPendingAmount ? 'text-rose-700' : 'text-zinc-300' }}">
+            <p class="mt-5 text-4xl font-extrabold tracking-tight {{ $hasPendingAmount ? 'text-red-700' : 'text-zinc-300' }}">
                 RM {{ number_format($this->stats->pendingCollection, 2) }}
             </p>
-            <p class="mt-1.5 text-xs font-semibold {{ $hasPendingAmount ? 'text-rose-400' : 'text-zinc-400' }}">
+            <p class="mt-1.5 text-xs font-medium {{ $hasPendingAmount ? 'text-red-400' : 'text-zinc-400' }}">
                 Pending + overdue monthly fees outstanding
             </p>
         </div>
@@ -358,7 +349,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
 
         {{-- Recent Activity (2/3) --}}
         <div class="lg:col-span-2">
-            <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm">
                 <div class="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
                     <div>
                         <h3 class="text-base font-bold text-zinc-900 dark:text-white">Recent Activity</h3>
@@ -421,7 +412,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
         <div class="flex flex-col gap-4">
 
             {{-- Quick Actions --}}
-            <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <div class="rounded-2xl border border-zinc-100 bg-white shadow-sm">
                 <div class="border-b border-zinc-100 px-5 py-3.5">
                     <h3 class="text-base font-bold text-zinc-900 dark:text-white">Quick Actions</h3>
                 </div>
@@ -470,7 +461,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
             </div>
 
             {{-- Member Status Breakdown --}}
-            <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <div class="rounded-2xl border border-zinc-100 bg-white shadow-sm">
                 <div class="border-b border-zinc-100 px-5 py-3.5">
                     <h3 class="text-base font-bold text-zinc-900 dark:text-white">Member Breakdown</h3>
                 </div>
@@ -516,7 +507,7 @@ new #[Layout('layouts.app'), Title('Dashboard')] class extends Component {
 
             {{-- Plan Distribution --}}
             @if ($this->planDistribution->isNotEmpty())
-                <div class="rounded-xl border border-zinc-200 bg-white shadow-sm">
+                <div class="rounded-2xl border border-zinc-100 bg-white shadow-sm">
                     <div class="border-b border-zinc-100 px-5 py-3.5">
                         <h3 class="text-base font-bold text-zinc-900 dark:text-white">Plan Distribution</h3>
                     </div>

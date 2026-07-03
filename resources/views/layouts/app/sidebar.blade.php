@@ -4,7 +4,7 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-slate-50">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-blue-100 bg-gradient-to-b from-blue-50 to-slate-50">
+        <flux:sidebar sticky collapsible="mobile" class="dark border-e border-zinc-800 bg-zinc-900">
 
             {{-- Branded header --}}
             @php
@@ -12,7 +12,7 @@
                 catch (\Throwable) { $sidebarSetting = null; }
             @endphp
             <flux:sidebar.header class="!p-0">
-                <div class="flex w-full items-center justify-between bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-4">
+                <div class="flex w-full items-center justify-between bg-gradient-to-br from-blue-600 to-indigo-700 px-4 py-5">
                     <a href="{{ route('dashboard') }}" wire:navigate class="flex min-w-0 items-center gap-3">
                         @if($sidebarSetting?->logo_path)
                             <img src="{{ Storage::url($sidebarSetting->logo_path) }}"
@@ -79,15 +79,15 @@
             <flux:spacer />
 
             {{-- View Public Page footer card --}}
-            <div class="mx-3 mb-3 overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-br from-blue-100 to-indigo-100">
+            <div class="mx-3 mb-3 overflow-hidden rounded-xl border border-zinc-700/60 bg-zinc-800">
                 <a href="{{ route('home') }}" target="_blank"
-                   class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-blue-100/50">
-                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500 shadow-sm">
+                   class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-700/50">
+                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
                         <flux:icon name="arrow-top-right-on-square" class="size-4 text-white" />
                     </div>
                     <div>
-                        <p class="text-sm font-semibold text-blue-700">Public Page</p>
-                        <p class="text-xs text-blue-400">View your gym site</p>
+                        <p class="text-sm font-semibold text-zinc-100">Public Page</p>
+                        <p class="text-xs text-zinc-400">View your gym site</p>
                     </div>
                 </a>
             </div>

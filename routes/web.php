@@ -12,6 +12,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     // Members
     Route::livewire('members', 'pages::members.index')->name('members.index');
     Route::livewire('members/create', 'pages::members.create')->name('members.create');
+    Route::livewire('members/{member}/edit', 'pages::members.edit')->name('members.edit');
     Route::livewire('members/{member}', 'pages::members.show')->name('members.show');
 
     // Payments

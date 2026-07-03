@@ -124,4 +124,41 @@ class Member extends Model
     {
         return $this->user_id !== null;
     }
+
+    public function nextPaymentDueDate(): ?Carbon
+    {
+        $plan = $this->currentPlan;
+        if (! $plan) {
+            return null;
+        }
+
+        $billingDay = $plan->billing_day ?? 1;
+        $today = today();
+        $thisMonthDue = Carbon::create($today->year, $today->month, min($billingDay, $today->daysInMonth));
+
+        if ($today->lte($thisMonthDue)) {
+            return $thisMonthDue;
+        }
+
+        $nextMonth = $today->copy()->addMonth()->startOfMonth();
+
+        return Carbon::create($nextMonth->year, $nextMonth->month, min($billingDay, $nextMonth->daysInMonth));
+    }
+
+    public function whatsappReminderUrl(float $amount, Carbon $dueDate): ?string
+    {
+        if (! $this->phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $this->phone);
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '60' . substr($digits, 1);
+        }
+
+        $message = "Hi {$this->full_name}! This is a friendly reminder that your monthly gym fee of RM " . number_format($amount, 2) . " is due on " . $dueDate->format('d M Y') . ". Kindly make your payment and send us the screenshot. Thank you!";
+
+        return 'https://wa.me/' . $digits . '?text=' . rawurlencode($message);
+    }
 }

@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('members', function (Blueprint $table) {
+            $table->index('created_at');
+        });
+
+        Schema::table('monthly_payments', function (Blueprint $table) {
+            $table->index('verified_at');
+        });
+
+        Schema::table('registration_payments', function (Blueprint $table) {
+            $table->index('verified_at');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('members', function (Blueprint $table) {
+            $table->dropIndex(['created_at']);
+        });
+
+        Schema::table('monthly_payments', function (Blueprint $table) {
+            $table->dropIndex(['verified_at']);
+        });
+
+        Schema::table('registration_payments', function (Blueprint $table) {
+            $table->dropIndex(['verified_at']);
+        });
+    }
+};
